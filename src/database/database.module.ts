@@ -4,21 +4,19 @@ import { TypeOrmModule } from "@nestjs/typeorm";
 
 @Module({
   imports: [
-    TypeOrmModule.forRootAsync({
-      imports: [ConfigModule],
-      inject: [ConfigService],
-      useFactory: (configService: ConfigService) => ({
-        type: "postgres",
-        host: configService.get<string>("POSTGRES_HOST"),
-        port: configService.get<number>("POSTGRES_PORT"),
-        username: configService.get<string>("POSTGRES_USER"),
-        password: configService.get<string>("POSTGRES_PASSWORD"),
-        database: configService.get<string>("POSTGRES_DB"),
-        entities: [],
-        autoLoadEntities: true,
-        synchronize: true,
-      }),
-    }),
+    //     TypeOrmModule.forRoot({
+    //       type: "postgres",
+    //       host: process.env.DB_HOST,
+    //       port: +process.env.DB_PORT,
+    //       username: process.env.DB_USERNAME,
+    //       password: process.env.DB_PASSWORD,
+    //       database: "alicedb",
+    //       //   database: "route",
+    //       //   synchronize: process.env.NODE_ENV !== "prod",
+    //       //   logging: process.env.NODE_ENV !== "prod",
+    //       //   entities: [User, Verification, Restaurant, Category],
+    //     }),
+    //   ],
   ],
 })
 export class DatabaseModule {}
