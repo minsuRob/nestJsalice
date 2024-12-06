@@ -1,9 +1,10 @@
-import { NestFactory } from "@nestjs/core";
+import { NestFactory, Reflector } from "@nestjs/core";
 import { AppModule } from "./app.module";
 import { ConfigService } from "@nestjs/config";
 import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
-import { ValidationPipe } from "@nestjs/common";
+import { ClassSerializerInterceptor, ValidationPipe } from "@nestjs/common";
 import { VersioningType } from "@nestjs/common";
+import { TransformInterceptor } from "./common/intercetprors/transform.interceptor";
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -23,6 +24,9 @@ async function bootstrap() {
   // });
 
   app.useGlobalPipes(new ValidationPipe({ skipMissingProperties: true }));
+
+  app.useGlobalInterceptors(new TransformInterceptor());
+  app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));
 
   const config = new DocumentBuilder()
     .setTitle("Alice Lab Nest")
