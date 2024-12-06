@@ -1,22 +1,27 @@
 import {
-  CallHandler,
-  ExecutionContext,
-  HttpStatus,
   Injectable,
   NestInterceptor,
+  ExecutionContext,
+  CallHandler,
+  HttpStatus,
 } from "@nestjs/common";
 import { Observable } from "rxjs";
 import { map } from "rxjs/operators";
 
 export interface Response<T> {
-  statusCode: number;
-  message: string;
   data: T;
+  status: number;
+  message: string;
 }
 
 @Injectable()
-export class TransformInterceptor<T> implements NestInterceptor<T> {
-  intercept(context: ExecutionContext, next: CallHandler<T>): Observable<T> {
+export class TransformInterceptor<T>
+  implements NestInterceptor<T, Response<T>>
+{
+  intercept(
+    context: ExecutionContext,
+    next: CallHandler
+  ): Observable<Response<T>> {
     const ctx = context.switchToHttp();
     const response = ctx.getResponse();
     const statusCode = response.statusCode;
@@ -24,32 +29,48 @@ export class TransformInterceptor<T> implements NestInterceptor<T> {
     return next.handle().pipe(
       map((data) => {
         const responseData = data === null || data === undefined ? {} : data;
-        const message = this.getResponseMessage(statusCode);
-        const finalMeesage = responseData.message || message;
-        const finalStatus2 = responseData.status || statusCode;
+        const message = this.getDefaultMessage(statusCode);
+        const finalMessage = responseData.message || message;
+        const finalStatus = responseData.status || statusCode;
 
-        if (responseData.message) {
+        if (responseData) {
           delete responseData.message;
-          delete responseData.stauts;
+          delete responseData.status;
         }
 
         return {
-          statusCode: finalStatus2,
-          message: finalMeesage,
+          status: finalStatus,
+          message: finalMessage,
           data: responseData,
         };
       })
     );
   }
 
-  private getResponseMessage(statusCode: number) {
-    switch (statusCode) {
+  private getDefaultMessage(status: number): string {
+    switch (status) {
       case HttpStatus.OK:
-        return "Request success";
+        return "Request successful";
       case HttpStatus.CREATED:
-        return "Resource created";
+        return "Resource created successfully";
+      case HttpStatus.ACCEPTED:
+        return "Request accepted";
+      case HttpStatus.NO_CONTENT:
+        return "Resource deleted successfully";
+      case HttpStatus.BAD_REQUEST:
+        return "Bad request";
+      case HttpStatus.UNAUTHORIZED:
+        return "Unauthorized";
+      case HttpStatus.FORBIDDEN:
+        return "Forbidden";
+      case HttpStatus.NOT_FOUND:
+        return "Resource not found";
+      case HttpStatus.CONFLICT:
+        return "conflict";
+      case HttpStatus.INTERNAL_SERVER_ERROR:
+        return "Internal server error";
       default:
-        return "Request success";
+        return "Request processed successfully";
     }
   }
 }
