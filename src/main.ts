@@ -2,11 +2,28 @@ import { NestFactory } from "@nestjs/core";
 import { AppModule } from "./app.module";
 import { ConfigService } from "@nestjs/config";
 import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
+import { ValidationPipe } from "@nestjs/common";
+import { VersioningType } from "@nestjs/common";
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const configService = app.get(ConfigService);
   //swagger setup
+
+  // app.useGlobalPipes(new ValidationPipe({ transform: true }));
+  // app.setGlobalPrefix("api");
+  // app.enableVersioning({
+  //   type: VersioningType.URI,
+  //   defaultVersion: "1",
+  // });
+  // 이걸 사용하면 /api/v1/ 이런 식으로 버전 관리 가능
+
+  // app.enableCors({
+  //   origin: "http://localhost:3000",
+  // });
+
+  app.useGlobalPipes(new ValidationPipe({ skipMissingProperties: true }));
+
   const config = new DocumentBuilder()
     .setTitle("Alice Lab Nest")
     .setDescription("Alice TEST API")
